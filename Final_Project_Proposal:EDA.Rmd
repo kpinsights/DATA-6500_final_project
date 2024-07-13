@@ -1,19 +1,23 @@
 ---
 title: 'Final Project Proposal : Route Optimization in Downtown Toronto using LCPA'
+knit: (function(input_file, encoding) {
+    out_dir <- 'docs';
+    rmarkdown::render(input_file,
+      encoding=encoding,
+      output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 author: "Kshitiz Pokhrel, Santosh Satapathy, Suraj Karthik"
 date: 'Due : July 12, 2024'
 output:
-  pdf_document:
+  html_document:
     fig_caption: true
-    includes:
-      in_header: fig_header.tex
 urlcolor: blue
 fontsize: 12pt
+  
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.align = 'center')
-knitr::include_graphics("Leaflet_map_with_inset.png")
 ```
 
 ```{r include=FALSE, echo=FALSE}
@@ -351,17 +355,10 @@ leaflet_map <- leaflet() |>
   addMiniMap(tiles = providers$CartoDB.Positron, 
              toggleDisplay = TRUE,
              minimized = FALSE)
-
-# Save the map as an HTML file
-saveWidget(leaflet_map, "leaflet_map_with_inset.html", selfcontained = TRUE)
-
 ```
 
-
-```{r printing static map, fig.cap = "Toronto Center Map with Traffic Signal locations, Traffic Congestion levels and Speed Limits."}
-webshot("leaflet_map_with_inset.html",
-        file = "Leaflet_map_with_inset.png", 
-        cliprect = "viewport")
+```{r}
+leaflet_map
 ```
 
 ```{r Saving the datasets}
