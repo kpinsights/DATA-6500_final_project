@@ -315,7 +315,7 @@ congestion_pal = colorFactor(c("#228B22", "#FFA500",
 ```{r Plotting traffic raster layer over a leaflet map, message=FALSE, warning=FALSE, results='hide'}
 
 # Main map
-leaflet_map <- leaflet() |>
+leaflet_map <- leaflet(options = leafletOptions(width = "100%")) |>
   addProviderTiles("CartoDB.VoyagerLabelsUnder") |>
   addPolygons(data = toronto_center_traffic_polygon, 
               color = "black",
@@ -357,7 +357,7 @@ leaflet_map <- leaflet() |>
              minimized = FALSE)
 ```
 
-```{r, fig.cap = "Interactive map showing the traffic congestion level, speed limits and traffic signal location within the Toronto Centre ward."}
+```{r, fig.cap = "Interactive map showing the traffic congestion level, speed limits and traffic signal location within the Toronto Centre ward.", fig.align='center'}
 leaflet_map
 ```
 
