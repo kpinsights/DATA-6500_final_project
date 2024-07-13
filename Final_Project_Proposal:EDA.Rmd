@@ -357,7 +357,7 @@ leaflet_map <- leaflet() |>
              minimized = FALSE)
 ```
 
-```{r}
+```{r, fig.cap = "Interactive map showing the traffic congestion level, speed limits and traffic signal location within the Toronto Centre ward."}
 leaflet_map
 ```
 
