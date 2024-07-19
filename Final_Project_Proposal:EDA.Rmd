@@ -1,12 +1,12 @@
 ---
-title: 'Final Project Proposal : Route Optimization in Downtown Toronto using LCPA'
+title: 'Interactive map'
 knit: (function(input_file, encoding) {
     out_dir <- 'docs';
     rmarkdown::render(input_file,
       encoding=encoding,
       output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
-author: "Kshitiz Pokhrel, Santosh Satapathy, Suraj Karthik"
-date: 'Due : July 12, 2024'
+author: " "
+date: ' '
 output:
   html_document:
     fig_caption: true
@@ -44,15 +44,6 @@ library(gstat)
 library(grid)
 ```
 
-# Introduction and Objective
-
-Traffic congestion is one of many problems that exist in urban areas. High traffic congestion not only increases travel time and fuel consumption, but also tends to impact the life of people living in urban areas. One of such cities that faces this challenge is, Toronto. As of recently, Toronto has topped the list of the most congested cities in North America, beating out both New York and Mexico City (Wilson, 2024). Addressing this critical issue is very important to enhance urban mobility of commuters and residents of Toronto.
-
-Hence, the primary objective of this project is to perform a Least Cost Path Analysis using various geo-spatial datasets such as Traffic Congestion levels along the road segments, speed limits of the roads and locations of traffic signals to determine the optimal travel route in downtown Toronto. The overarching goal of this project is to develop an optimized routing system that recommends the best routes for travel in downtown Toronto, considering traffic congestion as the primary cost. With the development of such system we aim to potentially reduce travel times for commuters, which could positively impact their quality of life.
-
-# Data Sources and Description
-
-*The analysis will cover the downtown area of Toronto, for EDA purpose (as a proof of concept) we are currently using only 1 ward (Toronto Center).*
 
 ```{r Loading the datasets, message=FALSE, warning=FALSE, include=FALSE}
 load("Final_Proj_data.RData")
@@ -78,13 +69,6 @@ toronto_center_traffic_polygon = st_read(toronto_center_shp)
 
 ```
 
-## Road Network Data
-
--   Source: OpenStreetMap
-
--   Description : A Simple Feature collection containing the linestrings that form the road network of Toronto
-
--   Data Relevence : The road network data serves as the backbone for the Least Cost Path Analysis (LCPA). It allows us to map out potential routes and analyze the connectivity between different points in the city.
 
 ```{r Toronto Bbox, message=FALSE, warning=FALSE, include=FALSE}
 # Extracting bounding box coordinates for Toronto
@@ -143,7 +127,7 @@ cropped_road_network = st_transform(cropped_road_network,
                                     crs(toronto_center_traffic_polygon))
 ```
 
-```{r, fig.cap= "Toronto Centre Road Network with an Inset map"}
+```{r ,include=FALSE}
 # Plotting the main map (Toronto Center boundary with cropped road network)
 main_map = tm_shape(toronto_center_traffic_polygon) +
   tm_borders(col = "black", lwd = 2) +
@@ -174,13 +158,6 @@ print(inset_map, vp = viewport(0.85, 0.85, width = 0.25, height = 0.30))
 
 ```
 
-## Traffic Congestion Data:
-
--   Source: Extracted using the `googletraffic` package in R.
-
--   Description: A raster dataset representing traffic congestion levels (1 to 4) for every street and highway in downtown Toronto, captured at different times of a day (peak and non-peak hours) over a week.
-
--   Data Relevance: The core of our project is to determine the best route based on congestion level, hence this dataset is a primary requirement. The traffic congestion data is used to create the cost surface for the LCPA. By assigning cost values based on congestion levels, the analysis can identify routes that minimize travel time and avoid heavily congested areas.
 
 ```{r Congestion Data from Google Traffic, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 
@@ -203,29 +180,6 @@ congestion_df = rasterToPoints(congestion_raster, spatial = TRUE) |>
 names(congestion_df) = c( "congestion_level","x", "y")
 ```
 
-## Traffic Signal Data:
-
--   Source: Toronto Open Data Portal
-
--   Description: This traffic signal location data collected from toronto open data portal contains information about the location of all traffic signals across toronto. The data is originally in `csv` format.
-
--   Data Relevance : The presence of traffic signals will also be used as one of the cost factors in determining the lowest cost path. Traffic signals significantly impact travel time, especially in urban areas. Knowing the locations of traffic signals allows the analysis to account for potential delays caused by red lights.
-
-## Speed Limit Data:
-
--   Source: This data was extracted from Overpass turbo by running a query to extract the `maxspeed`.
-
--   Description: Contains information about the speed limits of the road segments in Toronto.
-
--   Data Relevance: The speed limit data can be crucial while determining the lowest cost path. Speed limit data will be integrated into the cost surface creation for the LCPA. This data helps to ensure that the analysis adheres to legal speed constraints and provides realistic route estimations.
-
-# Data Manipulation and EDA
-
-In this section we manipulate and filter the data from the extracted raw data to include only whats necessary for our analysis. It is important to ensure that the data sets contain the necessary information, are in correct format, and in case of Spatial analysis, the spatial data must be in the same CRS.
-
--   **Congestion Level Raster Layer**
-
-We convert the large RasterLayer into a SpatRaster for integration with the `terra` package and easier manipulation. Furthermore we extract polygons from the Spatraster, so that we have more flexibility while creating visualizations. Also, having different forms of the data provides us with more flexibility during analysis as well, as it allows us to choose the most suitable representation for specific tasks.
 
 ```{r Rasterlayer to Spatraster and polygons, message=FALSE, warning=FALSE, include=FALSE}
 congestion_spatraster = rast(congestion_raster) # Converting to spatraster
@@ -233,9 +187,6 @@ congestion_spatraster = rast(congestion_raster) # Converting to spatraster
 congestion_polygons = as.polygons(congestion_spatraster, dissolve = TRUE)
 ```
 
--   **Traffic Signal Data**
-
-This data is originally in csv format, which is converted into a Simple Feature object and since we are only interested in the location of these signals within the Toronto Centre boundary, we extract only the location of the signals within this boundary.
 
 ```{r Reading traffic signal data, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 traffic_light_locations = read.csv("Traffic_lights.csv")
@@ -252,9 +203,6 @@ traffic_lights_toronto_center = traffic_lights_toronto_center |>
   dplyr::select(geometry)
 ```
 
--   **Speed Limits Data**
-
-From the speed limits data ,which is a simple feature collection, we extracted only the `maxspeed` and `geometry` fields, which was then cropped to only contain the data that falls within the Toronto Centre boundary.
 
 ```{r Loading speed limits data, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 speed_limits = st_read("speed_limits.geojson")
@@ -290,10 +238,6 @@ speed_limits_filtered_tc = st_transform(
                                 4326
                                 )
 ```
-
-## Visualization
-
-At this point we have the traffic congestion Raster layer, the locations of traffic signals and the speed limits of the road segments. We can use leaflet to create a visualization to display this data.
 
 ```{r Setting color palettes, message=FALSE, warning=FALSE}
 #We first define the color palettes based on the values of 
@@ -376,56 +320,3 @@ leaflet_map
 # save(list = names(datasets_to_save), file = save_path)
 ```
 
-# Analysis Plan
-
-## Data Interpolation:
-
-Interpolate missing data in congestion level datasets using appropriate methods such as Inverse Distance Weighting (IDW) or Kriging. This ensures completeness and accuracy of congestion level predictions, enhancing the reliability of route optimization outcomes.
-
-## Least Cost Path Analysis (LCPA)
-
-The analysis will utilize the road network data, congestion level data, speed limits data, and traffic signal location data to perform Least Cost Path Analysis.
-
-### Steps:
-
-**Cost Surface Creation:**
-
--   **Congestion-Based Costs:** Assign cost values to road segments based on real-time congestion levels. Higher congestion translates to higher travel costs.
-
--   **Speed Limits:** Include speed limits of the road segments as a cost factor affecting travel times
-
--   **Traffic Signals:** Incorporate presence of traffic signals as additional cost factors affecting travel time.
-
-**Route Optimization:**
-
--   **Least Cost Path Calculation:** Use LCPA to compute the least cost path between specified origins and destinations.
-
--   **Factors Considered:** Calculate optimal routes considering congestion costs, speed limits, and traffic signal delays. Optimize routes to minimize travel time under varying traffic conditions.
-
-**Validation and Testing:**
-
--   **Scenario Testing:** Use data from different traffic scenarios (e.g., peak hours, off-peak times) to assess the model's robustness and performance.
-
-## Possible Extensions
-
-### Congestion Level Forecasting:
-
-Using the congestion level data collected over a week and the traffic signal location and speed limits data (which are constant), we aim to forecast congestion levels. Based on the forecasted congestion level, the plan is to determine the lowest cost path from point A to point B in the future.
-
-# Challenges and Limitations
-
-One of the main challenges in this project is to ensure the quality and completeness of the data. Missing data, especially in congestion levels, could impact the accuracy of the analysis. Interpolation methods such as Inverse Distance Weighting (IDW) or Kriging will be employed to fill in these gaps, but selecting the most appropriate and efficient method is crucial to achieve reliable predictions. The dynamic nature of traffic poses another challenge, as static datasets may not capture real-time variations. Forecasting future congestion levels based on constant speed limits and traffic signal locations also has limitations due to the unpredictable nature of traffic.
-
-# Conclusion
-
-To sum up, this project aims to provide more efficient route recommendations through Least Cost Path analysis by integrating traffic congestion data, the speed limits, and traffic signal locations with a goal of enhancing urban mobility in downtown Toronto. The use of Least Cost Path Analysis (LCPA) and spatial interpolation methods like Kriging ensures a comprehensive approach to address traffic congestion challenges. Despite the challenges of data quality, real-time traffic variations, and computational demands, this project has the potential to significantly improve routing efficiency and reduce travel time.
-
-# References
-
-City of Toronto. (n.d.). Traffic signals - tabular. Toronto Open Data. Retrieved July 10, 2024, from <https://open.toronto.ca/dataset/traffic-signals-tabular/>
-
-OpenStreetMap contributors (2024). OpenStreetMap [Data set]. OpenStreetMap Foundation. Available as open data under the Open Data Commons Open Database License (ODbL) at openstreetmap.org.
-
-Marty, R. (2024). googletraffic: Google Traffic (Version 0.1.6) [Software]. Available from <https://cran.r-project.org/package=googletraffic>
-
-Wilson, C. (2024, January 11). Toronto ranked worst city in North America for traffic, new index finds. CTV News. Retrieved from <https://toronto.ctvnews.ca/toronto-ranked-worst-city-in-north-america-for-traffic-new-index-finds-1.6721437>

@@ -1,0 +1,2946 @@
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpC99PfW/file53e05aee16df.html screenshot completed
+Processing grid / API query 2 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpC99PfW/file53e02c61d3e6.html screenshot completed
+Processing grid / API query 3 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpC99PfW/file53e04a9eb7cd.html screenshot completed
+Processing grid / API query 4 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpC99PfW/file53e07a351a00.html screenshot completed
+Processing grid / API query 5 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpC99PfW/file53e0343e34ae.html screenshot completed
+There were 17 warnings (use warnings() to see them)
+> filename <- paste0("congestion_raster_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".tif")
+> writeRaster(congestion_raster, filename = filename, format = "GTiff")
+> 
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmp11WfYk/file55c25cf8e655.html screenshot completed
+Processing grid / API query 2 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmp11WfYk/file55c27ed91119.html screenshot completed
+Processing grid / API query 3 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmp11WfYk/file55c25cf1c15e.html screenshot completed
+Processing grid / API query 4 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmp11WfYk/file55c23ce31fe.html screenshot completed
+Processing grid / API query 5 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmp11WfYk/file55c256341ca5.html screenshot completed
+There were 17 warnings (use warnings() to see them)
+> filename <- paste0("congestion_raster_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".tif")
+> writeRaster(congestion_raster, filename = filename, format = "GTiff")
+> 
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+Error in `startup()`:
+! Chrome debugging port not open after 10 seconds.
+Backtrace:
+     x
+  1. \-googletraffic::gt_make_raster_from_polygon(...)
+  2.   \-googletraffic::gt_make_raster_from_grid(...)
+  3.     \-base::lapply(...)
+  4.       \-googletraffic (local) FUN(X[[i]], ...)
+  5.         \-googletraffic::gt_make_raster(...)
+  6.           \-googletraffic:::gt_html_to_raster(...)
+  7.             +-base::suppressWarnings(...)
+  8.             | \-base::withCallingHandlers(...)
+  9.             \-webshot2::webshot(...)
+ 10.               \-chromote::default_chromote_object()
+ 11.                 +-chromote::set_default_chromote_object(Chromote$new())
+ 12.                 \-Chromote$new()
+ 13.                   \-chromote (local) initialize(...)
+ 14.                     \-Chrome$new()
+ 15.                       \-chromote (local) initialize(...)
+ 16.                         \-chromote:::launch_chrome(path, args)
+ 17.                           \-chromote:::with_random_port(...)
+ 18.                             +-base::tryCatch(...)
+ 19.                             | \-base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.                             |   \-base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.                             |     \-base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.                             \-chromote (local) startup(port = port, ...)
+ 23.                               \-rlang::abort(...)
+There were 13 warnings (use warnings() to see them)
+Execution halted
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+Error in `startup()`:
+! Chrome debugging port not open after 10 seconds.
+Backtrace:
+     x
+  1. \-googletraffic::gt_make_raster_from_polygon(...)
+  2.   \-googletraffic::gt_make_raster_from_grid(...)
+  3.     \-base::lapply(...)
+  4.       \-googletraffic (local) FUN(X[[i]], ...)
+  5.         \-googletraffic::gt_make_raster(...)
+  6.           \-googletraffic:::gt_html_to_raster(...)
+  7.             +-base::suppressWarnings(...)
+  8.             | \-base::withCallingHandlers(...)
+  9.             \-webshot2::webshot(...)
+ 10.               \-chromote::default_chromote_object()
+ 11.                 +-chromote::set_default_chromote_object(Chromote$new())
+ 12.                 \-Chromote$new()
+ 13.                   \-chromote (local) initialize(...)
+ 14.                     \-Chrome$new()
+ 15.                       \-chromote (local) initialize(...)
+ 16.                         \-chromote:::launch_chrome(path, args)
+ 17.                           \-chromote:::with_random_port(...)
+ 18.                             +-base::tryCatch(...)
+ 19.                             | \-base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.                             |   \-base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.                             |     \-base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.                             \-chromote (local) startup(port = port, ...)
+ 23.                               \-rlang::abort(...)
+There were 13 warnings (use warnings() to see them)
+Execution halted
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+Error in `startup()`:
+! Chrome debugging port not open after 10 seconds.
+Backtrace:
+     x
+  1. \-googletraffic::gt_make_raster_from_polygon(...)
+  2.   \-googletraffic::gt_make_raster_from_grid(...)
+  3.     \-base::lapply(...)
+  4.       \-googletraffic (local) FUN(X[[i]], ...)
+  5.         \-googletraffic::gt_make_raster(...)
+  6.           \-googletraffic:::gt_html_to_raster(...)
+  7.             +-base::suppressWarnings(...)
+  8.             | \-base::withCallingHandlers(...)
+  9.             \-webshot2::webshot(...)
+ 10.               \-chromote::default_chromote_object()
+ 11.                 +-chromote::set_default_chromote_object(Chromote$new())
+ 12.                 \-Chromote$new()
+ 13.                   \-chromote (local) initialize(...)
+ 14.                     \-Chrome$new()
+ 15.                       \-chromote (local) initialize(...)
+ 16.                         \-chromote:::launch_chrome(path, args)
+ 17.                           \-chromote:::with_random_port(...)
+ 18.                             +-base::tryCatch(...)
+ 19.                             | \-base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.                             |   \-base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.                             |     \-base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.                             \-chromote (local) startup(port = port, ...)
+ 23.                               \-rlang::abort(...)
+There were 13 warnings (use warnings() to see them)
+Execution halted
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+Error in `startup()`:
+! Chrome debugging port not open after 10 seconds.
+Backtrace:
+     x
+  1. \-googletraffic::gt_make_raster_from_polygon(...)
+  2.   \-googletraffic::gt_make_raster_from_grid(...)
+  3.     \-base::lapply(...)
+  4.       \-googletraffic (local) FUN(X[[i]], ...)
+  5.         \-googletraffic::gt_make_raster(...)
+  6.           \-googletraffic:::gt_html_to_raster(...)
+  7.             +-base::suppressWarnings(...)
+  8.             | \-base::withCallingHandlers(...)
+  9.             \-webshot2::webshot(...)
+ 10.               \-chromote::default_chromote_object()
+ 11.                 +-chromote::set_default_chromote_object(Chromote$new())
+ 12.                 \-Chromote$new()
+ 13.                   \-chromote (local) initialize(...)
+ 14.                     \-Chrome$new()
+ 15.                       \-chromote (local) initialize(...)
+ 16.                         \-chromote:::launch_chrome(path, args)
+ 17.                           \-chromote:::with_random_port(...)
+ 18.                             +-base::tryCatch(...)
+ 19.                             | \-base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.                             |   \-base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.                             |     \-base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.                             \-chromote (local) startup(port = port, ...)
+ 23.                               \-rlang::abort(...)
+There were 13 warnings (use warnings() to see them)
+Execution halted
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+Error in `startup()`:
+! Chrome debugging port not open after 10 seconds.
+Backtrace:
+     x
+  1. \-googletraffic::gt_make_raster_from_polygon(...)
+  2.   \-googletraffic::gt_make_raster_from_grid(...)
+  3.     \-base::lapply(...)
+  4.       \-googletraffic (local) FUN(X[[i]], ...)
+  5.         \-googletraffic::gt_make_raster(...)
+  6.           \-googletraffic:::gt_html_to_raster(...)
+  7.             +-base::suppressWarnings(...)
+  8.             | \-base::withCallingHandlers(...)
+  9.             \-webshot2::webshot(...)
+ 10.               \-chromote::default_chromote_object()
+ 11.                 +-chromote::set_default_chromote_object(Chromote$new())
+ 12.                 \-Chromote$new()
+ 13.                   \-chromote (local) initialize(...)
+ 14.                     \-Chrome$new()
+ 15.                       \-chromote (local) initialize(...)
+ 16.                         \-chromote:::launch_chrome(path, args)
+ 17.                           \-chromote:::with_random_port(...)
+ 18.                             +-base::tryCatch(...)
+ 19.                             | \-base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.                             |   \-base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.                             |     \-base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.                             \-chromote (local) startup(port = port, ...)
+ 23.                               \-rlang::abort(...)
+There were 13 warnings (use warnings() to see them)
+Execution halted
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+Error in `startup()`:
+! Chrome debugging port not open after 10 seconds.
+Backtrace:
+     x
+  1. \-googletraffic::gt_make_raster_from_polygon(...)
+  2.   \-googletraffic::gt_make_raster_from_grid(...)
+  3.     \-base::lapply(...)
+  4.       \-googletraffic (local) FUN(X[[i]], ...)
+  5.         \-googletraffic::gt_make_raster(...)
+  6.           \-googletraffic:::gt_html_to_raster(...)
+  7.             +-base::suppressWarnings(...)
+  8.             | \-base::withCallingHandlers(...)
+  9.             \-webshot2::webshot(...)
+ 10.               \-chromote::default_chromote_object()
+ 11.                 +-chromote::set_default_chromote_object(Chromote$new())
+ 12.                 \-Chromote$new()
+ 13.                   \-chromote (local) initialize(...)
+ 14.                     \-Chrome$new()
+ 15.                       \-chromote (local) initialize(...)
+ 16.                         \-chromote:::launch_chrome(path, args)
+ 17.                           \-chromote:::with_random_port(...)
+ 18.                             +-base::tryCatch(...)
+ 19.                             | \-base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.                             |   \-base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.                             |     \-base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.                             \-chromote (local) startup(port = port, ...)
+ 23.                               \-rlang::abort(...)
+There were 13 warnings (use warnings() to see them)
+Execution halted
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+Error in `startup()`:
+! Chrome debugging port not open after 10 seconds.
+Backtrace:
+     x
+  1. \-googletraffic::gt_make_raster_from_polygon(...)
+  2.   \-googletraffic::gt_make_raster_from_grid(...)
+  3.     \-base::lapply(...)
+  4.       \-googletraffic (local) FUN(X[[i]], ...)
+  5.         \-googletraffic::gt_make_raster(...)
+  6.           \-googletraffic:::gt_html_to_raster(...)
+  7.             +-base::suppressWarnings(...)
+  8.             | \-base::withCallingHandlers(...)
+  9.             \-webshot2::webshot(...)
+ 10.               \-chromote::default_chromote_object()
+ 11.                 +-chromote::set_default_chromote_object(Chromote$new())
+ 12.                 \-Chromote$new()
+ 13.                   \-chromote (local) initialize(...)
+ 14.                     \-Chrome$new()
+ 15.                       \-chromote (local) initialize(...)
+ 16.                         \-chromote:::launch_chrome(path, args)
+ 17.                           \-chromote:::with_random_port(...)
+ 18.                             +-base::tryCatch(...)
+ 19.                             | \-base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.                             |   \-base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.                             |     \-base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.                             \-chromote (local) startup(port = port, ...)
+ 23.                               \-rlang::abort(...)
+There were 13 warnings (use warnings() to see them)
+Execution halted
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+Error in `startup()`:
+! Chrome debugging port not open after 10 seconds.
+Backtrace:
+     x
+  1. \-googletraffic::gt_make_raster_from_polygon(...)
+  2.   \-googletraffic::gt_make_raster_from_grid(...)
+  3.     \-base::lapply(...)
+  4.       \-googletraffic (local) FUN(X[[i]], ...)
+  5.         \-googletraffic::gt_make_raster(...)
+  6.           \-googletraffic:::gt_html_to_raster(...)
+  7.             +-base::suppressWarnings(...)
+  8.             | \-base::withCallingHandlers(...)
+  9.             \-webshot2::webshot(...)
+ 10.               \-chromote::default_chromote_object()
+ 11.                 +-chromote::set_default_chromote_object(Chromote$new())
+ 12.                 \-Chromote$new()
+ 13.                   \-chromote (local) initialize(...)
+ 14.                     \-Chrome$new()
+ 15.                       \-chromote (local) initialize(...)
+ 16.                         \-chromote:::launch_chrome(path, args)
+ 17.                           \-chromote:::with_random_port(...)
+ 18.                             +-base::tryCatch(...)
+ 19.                             | \-base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.                             |   \-base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.                             |     \-base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.                             \-chromote (local) startup(port = port, ...)
+ 23.                               \-rlang::abort(...)
+There were 13 warnings (use warnings() to see them)
+Execution halted
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmpw0M7nq/file848e10504c55.html screenshot completed
+Processing grid / API query 2 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmpw0M7nq/file848e684d84d7.html screenshot completed
+Processing grid / API query 3 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmpw0M7nq/file848e394c74c0.html screenshot completed
+Processing grid / API query 4 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmpw0M7nq/file848e4a8506a3.html screenshot completed
+Processing grid / API query 5 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmpw0M7nq/file848e6376dd8d.html screenshot completed
+There were 17 warnings (use warnings() to see them)
+> filename <- paste0("congestion_raster_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".tif")
+> writeRaster(congestion_raster, filename = filename, format = "GTiff")
+> 
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpcSi6Uf/file85e551b326dd.html screenshot completed
+Processing grid / API query 2 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpcSi6Uf/file85e55d959f95.html screenshot completed
+Processing grid / API query 3 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpcSi6Uf/file85e5a201f33.html screenshot completed
+Processing grid / API query 4 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpcSi6Uf/file85e542e05276.html screenshot completed
+Processing grid / API query 5 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpcSi6Uf/file85e51545e347.html screenshot completed
+There were 17 warnings (use warnings() to see them)
+> filename <- paste0("congestion_raster_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".tif")
+> writeRaster(congestion_raster, filename = filename, format = "GTiff")
+> 
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmpv7W9Wx/file87d75ac58ea.html screenshot completed
+Processing grid / API query 2 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmpv7W9Wx/file87d744e4302c.html screenshot completed
+Processing grid / API query 3 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmpv7W9Wx/file87d76116bc09.html screenshot completed
+Processing grid / API query 4 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmpv7W9Wx/file87d71b9324ab.html screenshot completed
+Processing grid / API query 5 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmpv7W9Wx/file87d7594c64b1.html screenshot completed
+There were 17 warnings (use warnings() to see them)
+> filename <- paste0("congestion_raster_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".tif")
+> writeRaster(congestion_raster, filename = filename, format = "GTiff")
+> 
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpxlLKTS/file89723e80fd07.html screenshot completed
+Processing grid / API query 2 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpxlLKTS/file89725e044bf6.html screenshot completed
+Processing grid / API query 3 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpxlLKTS/file89726c1733b2.html screenshot completed
+Processing grid / API query 4 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpxlLKTS/file89726743228e.html screenshot completed
+Processing grid / API query 5 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpxlLKTS/file89726891cd98.html screenshot completed
+There were 17 warnings (use warnings() to see them)
+> filename <- paste0("congestion_raster_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".tif")
+> writeRaster(congestion_raster, filename = filename, format = "GTiff")
+> 
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+Error in overpass_query(query = obj$overpass_call, quiet = quiet, encoding = encoding) : 
+  object 'doc' not found
+Calls: osmdata_sf -> fill_overpass_data -> overpass_query
+Execution halted
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpNZwsdR/file8be554dfedce.html screenshot completed
+Processing grid / API query 2 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpNZwsdR/file8be5165af259.html screenshot completed
+Processing grid / API query 3 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpNZwsdR/file8be52cdcbc86.html screenshot completed
+Processing grid / API query 4 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpNZwsdR/file8be54fdd186c.html screenshot completed
+Processing grid / API query 5 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpNZwsdR/file8be53c6e836a.html screenshot completed
+There were 17 warnings (use warnings() to see them)
+> filename <- paste0("congestion_raster_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".tif")
+> writeRaster(congestion_raster, filename = filename, format = "GTiff")
+> 
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpoBvPpC/file8cc314e35afd.html screenshot completed
+Processing grid / API query 2 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpoBvPpC/file8cc34b0cf4cb.html screenshot completed
+Processing grid / API query 3 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpoBvPpC/file8cc33f9b61eb.html screenshot completed
+Processing grid / API query 4 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpoBvPpC/file8cc37239abec.html screenshot completed
+Processing grid / API query 5 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpoBvPpC/file8cc328464d8a.html screenshot completed
+There were 17 warnings (use warnings() to see them)
+> filename <- paste0("congestion_raster_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".tif")
+> writeRaster(congestion_raster, filename = filename, format = "GTiff")
+> 
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmp20GxBI/file8e284cf5f631.html screenshot completed
+Processing grid / API query 2 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmp20GxBI/file8e2834459b2a.html screenshot completed
+Processing grid / API query 3 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmp20GxBI/file8e2845cdfd35.html screenshot completed
+Processing grid / API query 4 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmp20GxBI/file8e2856aac660.html screenshot completed
+Processing grid / API query 5 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/Rtmp20GxBI/file8e2865c5f513.html screenshot completed
+There were 17 warnings (use warnings() to see them)
+> filename <- paste0("congestion_raster_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".tif")
+> writeRaster(congestion_raster, filename = filename, format = "GTiff")
+> 
+> library(dplyr)
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+> library(terra)
+terra 1.7.78
+> library(osmdata)
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+> library(sf)
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+> library(googletraffic)
+> library(googleway)
+> library(lubridate)  
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+> library(raster)
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+> bbox = st_bbox(c(xmin = -79.38884,
++                  xmax = -79.34936,
++                  ymax = 43.67320,
++                  ymin = 43.64576), 
++                crs = st_crs(4326))
+> wards = opq(bbox = bbox) |>
++   add_osm_feature(key = "admin_level", value = "9") |>
++   add_osm_feature(key = "boundary", value = "administrative") |>
++   osmdata_sf()
+> toronto_center = wards$osm_multipolygons |>
++   filter(osm_id == "9285661")
+> toronto_center_shp = "toronto_center_boundary.shp"
+> st_write(toronto_center, toronto_center_shp, append = FALSE)
+Deleting layer `toronto_center_boundary' using driver `ESRI Shapefile'
+Writing layer `toronto_center_boundary' to data source 
+  `toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Writing 1 features with 10 fields and geometry type Multi Polygon.
+Warning message:
+In abbreviate_shapefile_names(obj) :
+  Field names abbreviated for ESRI Shapefile driver
+> toronto_center_traffic_polygon = st_read(toronto_center_shp)
+Reading layer `toronto_center_boundary' from data source 
+  `/Users/kshitizpokhrel/toronto_center_boundary.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.38884 ymin: 43.64576 xmax: -79.34936 ymax: 43.6732
+Geodetic CRS:  WGS 84
+> google_key = Sys.getenv("google_maps_api_key")
+> congestion_raster = gt_make_raster_from_polygon(polygon =
++                                                 toronto_center_traffic_polygon,
++                                                 zoom = 17,
++                                                 google_key = google_key,
++                                                 webshot_zoom = 2,
++                                                 webshot_delay = NULL,
++                                                 print_progress = TRUE)
+Raster will be created from 5 Google traffic tiles.
+Processing grid / API query 1 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpgW4ak2/file90092ee311ae.html screenshot completed
+Processing grid / API query 2 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpgW4ak2/file9009543b33e5.html screenshot completed
+Processing grid / API query 3 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpgW4ak2/file90097acc2a96.html screenshot completed
+Processing grid / API query 4 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpgW4ak2/file900972001cd5.html screenshot completed
+Processing grid / API query 5 out of 5; pausing for 16 seconds to allow traffic data to render
+file:////private/tmp/RtmpgW4ak2/file900965651e6b.html screenshot completed
+There were 17 warnings (use warnings() to see them)
+> filename <- paste0("congestion_raster_", format(Sys.time(), "%Y-%m-%d_%H-%M"), ".tif")
+> writeRaster(congestion_raster, filename = filename, format = "GTiff")
+> 
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in readChar(con, 5L, useBytes = TRUE) : cannot open the connection
+Calls: load -> readChar
+In addition: Warning message:
+In readChar(con, 5L, useBytes = TRUE) :
+  cannot open compressed file 'Final_Proj_data.RData', probable reason 'No such file or directory'
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in readChar(con, 5L, useBytes = TRUE) : cannot open the connection
+Calls: load -> readChar
+In addition: Warning message:
+In readChar(con, 5L, useBytes = TRUE) :
+  cannot open compressed file 'Final_Proj_data.RData', probable reason 'No such file or directory'
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+terra 1.7.78
+Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+Breaking News: tmap 3.x is retiring. Please test v4, e.g. with
+remotes::install_github('r-tmap/tmap')
+
+Attaching package: 'lubridate'
+
+The following objects are masked from 'package:terra':
+
+    intersect, union
+
+The following objects are masked from 'package:base':
+
+    date, intersect, setdiff, union
+
+Google's Terms of Service: https://cloud.google.com/maps-platform/terms/.
+Please cite ggmap if you use it! See citation("ggmap") for details.
+
+Attaching package: 'ggmap'
+
+The following object is masked from 'package:terra':
+
+    inset
+
+Loading required package: sp
+
+Attaching package: 'raster'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+Registered S3 method overwritten by 'webshot':
+  method        from    
+  print.webshot webshot2
+
+Attaching package: 'webshot2'
+
+The following objects are masked from 'package:webshot':
+
+    appshot, resize, rmdshot, shrink, webshot
+
+
+Attaching package: 'grid'
+
+The following object is masked from 'package:terra':
+
+    depth
+
+Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function '%in%': object 'toronto_center_traffic_polygon' not found
+Calls: run_task ... gt_make_raster_from_polygon -> gt_make_grid -> %in% -> .handleSimpleError -> h
+Execution halted
